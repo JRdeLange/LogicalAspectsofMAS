@@ -173,7 +173,7 @@ Cards can be defined as colour1 (1,2), colour2(3,4), trump cards(5,6).
 """
 agents = ["a", "b", "c"]
 deck = [1, 2, 3]
-deck = [1, 2, 3, 4, 5, 6,7,8,9,10,11,12]
+deck = [1, 2, 3, 4, 5, 6]
 
 hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 hand_cards = [hand_a, hand_b, hand_c]
