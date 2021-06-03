@@ -3,6 +3,7 @@ from mlsolver.formula import *
 from mlsolver.formula import Atom, And, Not, Or, Box_a, Box_star
 from itertools import permutations
 import random
+import collections
 
 """
 ABOUT:
@@ -20,22 +21,26 @@ def deal_cards(deck, number_of_agents):
     random.shuffle(deck)
     return [deck[agent::number_of_agents] for agent in range(number_of_agents)]
 
+def same_elements(list1, list2):
+    return collections.Counter(list1) == collections.Counter(list2)
 
 def initialise_worlds(agents, deck, hand_cards):
     """
-	Generates the starting worlds of the Kripke model based on the agents and deck
-	First we make a list of all possible permutations of the deck
-	For each permutation we then create a world.
-	We get the name by joining the values of the cards into a single string.
-	We then get the truth values of the world by going over the cards in the world and marking:
-	- The first third of the cards as belonging to agent a
-	- The second third of the cards as belonging to agent b
-	- The final third of the cards as belonging to agent c
-	We then use the world name and truth values to add a new world to the initial worlds
-	"""
+    Generates the starting worlds of the Kripke model based on the agents and deck
+    First we make a list of all possible permutations of the deck
+    For each permutation we then create a world.
+    We get the name by joining the values of the cards into a single string.
+    We then get the truth values of the world by going over the cards in the world and marking:
+    - The first third of the cards as belonging to agent a
+    - The second third of the cards as belonging to agent b
+    - The final third of the cards as belonging to agent c
+    We then use the world name and truth values to add a new world to the initial worlds
+    """
     worlds = []
     possible_worlds = list(permutations(deck, len(deck)))
     accessible_worlds = []
+    nr_of_agents = len(hand_cards)
+    nr_of_cards_in_hand = len(hand_cards[0])
 
     # check if for at least one agent a 'possible world' is accessible, if not don't include it in the kripke model
     # print("Possible worlds: ", possible_worlds)
@@ -45,20 +50,20 @@ def initialise_worlds(agents, deck, hand_cards):
     # print("Hand_cards[0][0] ", hand_cards[0][0])
     agent = 2
     card = 1
-    print("Long ass ding: ", (len(hand_cards) - agent) * len(hand_cards[0]) + card, " voor agent: ", agent,
-          " en card: ", card)
+    #print("Long ass ding: ", (len(hand_cards) - agent) * len(hand_cards[0]) + card, " voor agent: ", agent,
+    #      " en card: ", card)
 
     # accessible becomes true if for at least one agent all its cards in his hand match another state
     for world in possible_worlds:
         accessible = False
-        for agent in range(len(hand_cards)):
+        for agent in range(nr_of_agents):
             same_hand = True
-            for card in range(len(hand_cards[agent])):
+            for card in range(nr_of_cards_in_hand):
                 # print("Agent: ", agent, " en card: ", card)
                 # print("Long ass ding: ", agent*len(hand_cards[0]) + card)
                 # print("Voor agent: ", agent, " en card: ", card)
                 # TODO: Is hieronder 0 of agent handiger? Het zou altijd dezelfde lengte moeten hebben maar weet niet wat jullie netter vinden
-                if not world[(agent) * len(hand_cards[0]) + card] == hand_cards[agent][card]:
+                if not world[(agent) * nr_of_cards_in_hand + card] == hand_cards[agent][card]:
                     same_hand = False
             # if all cards in this agents hand match, then this world is accessible from the real world
             if same_hand:
@@ -66,8 +71,10 @@ def initialise_worlds(agents, deck, hand_cards):
         if accessible:
             accessible_worlds.append(world)
 
-    print("Possible worlds: ", possible_worlds)
-    print("Accessible worlds: ", accessible_worlds)
+
+
+    #print("Possible worlds: ", possible_worlds)
+    #print("Accessible worlds: ", accessible_worlds)
 
     for world in accessible_worlds:
         world_name = ''.join(str(card) for card in world)
@@ -79,19 +86,27 @@ def initialise_worlds(agents, deck, hand_cards):
                 world_truth_values["b:" + str(card)] = True
             else:
                 world_truth_values["c:" + str(card)] = True
-        worlds.append(World(world_name, world_truth_values))
+        
+        duplicate = False
+        for checker in worlds:
+            curr_world = list(world_truth_values.keys())
+            checker = list(checker.assignment.keys())
+            if same_elements(curr_world, checker):
+                duplicate = True
+        if not duplicate:
+            worlds.append(World(world_name, world_truth_values))
 
     return worlds
 
 
 def initialise_relations(agents, deck, worlds):
     """
-	Generates the starting relations of the Kripke model based on the starting worlds
-	We first declare three empty sets for the agents.
-	We then go over each world combination for each agent.
-	We then add a relation for the agent for each world combination where the agent has the same cards.
-	(which is the starting knowledge of each agent, as each agent knows their own hand)
-	"""
+    Generates the starting relations of the Kripke model based on the starting worlds
+    We first declare three empty sets for the agents.
+    We then go over each world combination for each agent.
+    We then add a relation for the agent for each world combination where the agent has the same cards.
+    (which is the starting knowledge of each agent, as each agent knows their own hand)
+    """
     relations = {
         "a": set(),
         "b": set(),
@@ -118,17 +133,20 @@ def initialise_relations(agents, deck, worlds):
 
 def initialise_kripke_model(agents, deck, hand_cards):
     """
-	Generates the starting kripke model based on the agents and deck used
-	We first generate the starting worlds.
-	We then generate the starting relations of those worlds.
-	We then combine these into a kripke structure
-	"""
+    Generates the starting kripke model based on the agents and deck used
+    We first generate the starting worlds.
+    We then generate the starting relations of those worlds.
+    We then combine these into a kripke structure
+    """
 
     worlds = initialise_worlds(agents, deck, hand_cards)
 
     relations = initialise_relations(agents, deck, worlds)
 
     ks = KripkeStructure(worlds, relations)
+
+    print("amount of worlds: ", len(worlds))
+    print("amount of relations: ", len(relations))
 
     return ks
 
@@ -155,13 +173,17 @@ Cards can be defined as colour1 (1,2), colour2(3,4), trump cards(5,6).
 """
 agents = ["a", "b", "c"]
 deck = [1, 2, 3]
+deck = [1, 2, 3, 4, 5, 6,7,8,9,10,11,12]
 
 hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 hand_cards = [hand_a, hand_b, hand_c]
 print("Handcards: ", hand_cards)
 
 ks = initialise_kripke_model(agents, deck, hand_cards)
-print(ks)
+#print(ks)
+
+t1=['a:2', 'a:4', 'b:1', 'b:6', 'c:5', 'c:3']
+t2=['a:2', 'a:4', 'b:1', 'b:6', 'c:3', 'c:5']
 
 # The_Crew_game(agents, deck, hand_cards, ks)
 
@@ -176,6 +198,6 @@ Work In Progress
 print statements for looking inside of the kripke model
 """
 # for world in ks.worlds:
-#	print(world.name)
+#   print(world.name)
 # print(ks.relations)
 # print(ks)
