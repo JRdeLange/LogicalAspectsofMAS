@@ -4,6 +4,6 @@
 
 1. Download mlsolver from https://github.com/erohkohl/mlsolver
 
-2. Install by using the "python setup.py install" command in the downloaded mlsolver-master directory.
+2. Install by using the "python setup.py install" command in the downloaded mlsolver-master directory
 
-3. Run [final version name here].py
+3. Run TheCrewAlpha/TheCrewAlpha.py
