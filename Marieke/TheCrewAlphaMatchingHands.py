@@ -43,26 +43,12 @@ def initialise_worlds(agents, deck, hand_cards):
     nr_of_cards_in_hand = len(hand_cards[0])
 
     # check if for at least one agent a 'possible world' is accessible, if not don't include it in the kripke model
-    # print("Possible worlds: ", possible_worlds)
-    # print("Hand_cards length: ", len(hand_cards))
-    # print("Hand_cards[0]: ", hand_cards[0])
-    # print("Hand_cards[0] length: ", len(hand_cards[0]))
-    # print("Hand_cards[0][0] ", hand_cards[0][0])
-    agent = 2
-    card = 1
-    #print("Long ass ding: ", (len(hand_cards) - agent) * len(hand_cards[0]) + card, " voor agent: ", agent,
-    #      " en card: ", card)
-
     # accessible becomes true if for at least one agent all its cards in his hand match another state
     for world in possible_worlds:
         accessible = False
         for agent in range(nr_of_agents):
             same_hand = True
             for card in range(nr_of_cards_in_hand):
-                # print("Agent: ", agent, " en card: ", card)
-                # print("Long ass ding: ", agent*len(hand_cards[0]) + card)
-                # print("Voor agent: ", agent, " en card: ", card)
-                # TODO: Is hieronder 0 of agent handiger? Het zou altijd dezelfde lengte moeten hebben maar weet niet wat jullie netter vinden
                 if not world[(agent) * nr_of_cards_in_hand + card] == hand_cards[agent][card]:
                     same_hand = False
             # if all cards in this agents hand match, then this world is accessible from the real world
@@ -73,9 +59,6 @@ def initialise_worlds(agents, deck, hand_cards):
 
 
 
-    #print("Possible worlds: ", possible_worlds)
-    #print("Accessible worlds: ", accessible_worlds)
-
     for world in accessible_worlds:
         world_name = ''.join(str(card) for card in world)
         world_truth_values = {}
@@ -84,6 +67,10 @@ def initialise_worlds(agents, deck, hand_cards):
                 world_truth_values["a:" + str(card)] = True
             elif world.index(card) < len(deck) / 1.5:
                 world_truth_values["b:" + str(card)] = True
+
+    #print("Possible worlds: ", possible_worlds)
+    #print("Accessible worlds: ", accessible_worlds)
+
             else:
                 world_truth_values["c:" + str(card)] = True
         
@@ -145,8 +132,8 @@ def initialise_kripke_model(agents, deck, hand_cards):
 
     ks = KripkeStructure(worlds, relations)
 
-    print("amount of worlds: ", len(worlds))
-    print("amount of relations: ", len(relations))
+    print("Amount of worlds: ", len(worlds))
+    print("Amount of relations: ", len(relations["a"]) + len(relations["b"]) + len(relations["c"]))
 
     return ks
 
@@ -172,7 +159,7 @@ We initialise the kripke model based on the number of agents and "cards" in the 
 Cards can be defined as colour1 (1,2), colour2(3,4), trump cards(5,6).
 """
 agents = ["a", "b", "c"]
-deck = [1, 2, 3]
+# deck = [1, 2, 3]
 deck = [1, 2, 3, 4, 5, 6]
 
 hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
@@ -180,7 +167,8 @@ hand_cards = [hand_a, hand_b, hand_c]
 print("Handcards: ", hand_cards)
 
 ks = initialise_kripke_model(agents, deck, hand_cards)
-#print(ks)
+
+print("Kripke structure: ", ks)
 
 t1=['a:2', 'a:4', 'b:1', 'b:6', 'c:5', 'c:3']
 t2=['a:2', 'a:4', 'b:1', 'b:6', 'c:3', 'c:5']
