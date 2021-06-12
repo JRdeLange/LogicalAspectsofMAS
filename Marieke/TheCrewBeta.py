@@ -38,19 +38,18 @@ def initialise_worlds(agents, deck, hand_cards):
 
     # check if for at least one agent a 'possible world' is accessible, if not don't include it in the kripke model
     # accessible becomes true if for at least one agent all its cards in his hand match another state
-    for world in possible_worlds:
-        accessible = False
-        for agent in range(nr_of_agents):
-            same_hand = True
-            for card in range(nr_of_cards_in_hand):
-                # TODO: Is hieronder 0 of agent handiger? Het zou altijd dezelfde lengte moeten hebben maar weet niet wat jullie netter vinden
-                if not world[(agent) * nr_of_cards_in_hand + card] == hand_cards[agent][card]:
-                    same_hand = False
-            # if all cards in this agents hand match, then this world is accessible from the real world
-            if same_hand:
-                accessible = True
-        if accessible:
-            accessible_worlds.append(world)
+    # for world in possible_worlds:
+    #     accessible = False
+    #     for agent in range(nr_of_agents):
+    #         same_hand = True
+    #         for card in range(nr_of_cards_in_hand):
+    #             if not world[(agent) * nr_of_cards_in_hand + card] == hand_cards[agent][card]:
+    #                 same_hand = False
+    #         # if all cards in this agents hand match, then this world is accessible from the real world
+    #         if same_hand:
+    #             accessible = True
+    #     if accessible:
+    #         accessible_worlds.append(world)
     """
     For each permutation we then create a world.
     We get the name by joining the values of the cards into a single string.
@@ -61,16 +60,16 @@ def initialise_worlds(agents, deck, hand_cards):
     After that we check the world truth values against those of the other worlds.
     If the world does not exist yet we add it to the worlds list
     """
-    for world in accessible_worlds:
+    for world in possible_worlds:
         world_name = ''.join(str(card) for card in world)
         world_truth_values = {}
         for card in world:
             if world.index(card) < len(deck) / 3:
-                world_truth_values["a:" + str(card)] = True
+                world_truth_values["Job:" + str(card)] = True
             elif world.index(card) < len(deck) / 1.5:
-                world_truth_values["b:" + str(card)] = True
+                world_truth_values["Jordy:" + str(card)] = True
             else:
-                world_truth_values["c:" + str(card)] = True
+                world_truth_values["Marieke:" + str(card)] = True
 
         duplicate = False
         for checker in worlds:
@@ -143,6 +142,9 @@ def game_loop(agents, hand_cards, ks):
     cards_in_trick = 0
     current_player = 0
 
+    print("\nThe current kripke model:")
+    print(ks, "\n")
+
     while True:
         if cards_in_trick == len(agents):
             print("The deck of this trick was ", trick_deck, ". Player xxx played the highest card of this deck and has thus won this trick.")
@@ -150,12 +152,13 @@ def game_loop(agents, hand_cards, ks):
             cards_in_trick = 0
             trick_deck = None
         print("It is the turn of " +  agents[current_player])
-        # print("hand: " + str(hand_cards[current_player]))
-        action = input("Which action do you wish to perform? (type \"play\" to enter the next move, \"communicate\" to communicate or \"exit\" to quit)\n")
+        question = "Which action do you wish to perform? (type \"play\" to enter " + str(agents[current_player]) + "'s move, \"communicate\" to communicate or \"exit\" to quit)\n"
+        action = input(question)
         if action == "play":
             question = "What card is played by " + str(agents[current_player]) + "?\n"
             move = input(question)
             print("Player", agents[current_player], "played card", move)
+            ks = play_card(agents, current_player, move, ks)
             if cards_in_trick == 0:
                 trick_deck = deck(move)
             cards_in_trick += 1
@@ -165,7 +168,10 @@ def game_loop(agents, hand_cards, ks):
             question = "What card would " + communicate_agent + " like to communicate?\n"
             communicate_card = input(question)
             print(communicate_agent, "communicated card", communicate_card)
-        #     insert solve function
+            solve = communicate_agent + ":" + communicate_card
+            ks = ks.solve(Atom(solve))
+            print("The new kripke model:\n")
+            print(ks)
         elif action == "exit":
             print("See you next time!")
             break
@@ -185,6 +191,19 @@ def deck(card):
     return "The deck of this card, tbd"
 
 
+def play_card(agents, player, move, ks):
+    # for agent in agents:
+    #     if not agent == agents[player]:
+    #         solve = agent + ":" + move
+    #         print("Executing Not Atom ", solve)
+    #         ks = ks.solve(Not(Atom(solve)))
+    solve = agents[player] + ":" + move
+    ks = ks.solve(Atom(solve))
+    print("The new kripke model:\n")
+    print(ks)
+    return ks
+
+
 def The_Crew_game():
     """
     We initialise the kripke model based on the number of agents, "cards" in the deck and the cards in the hands of the agents
@@ -192,10 +211,10 @@ def The_Crew_game():
     """
 
     agents = ["Job", "Jordy", "Marieke"]
-    # agents = ["a", "b", "m"]
+    # agents = ["a", "b", "c"]
 
-    deck = [1, 2, 3, 4, 5, 6]
-    # deck = [1, 2, 3]
+    # deck = [1, 2, 3, 4, 5, 6]
+    deck = [1, 2, 3]
 
     hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
     hand_cards = [hand_a, hand_b, hand_c]

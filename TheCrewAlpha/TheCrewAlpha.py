@@ -147,12 +147,19 @@ def The_Crew_game():
 	Cards can be defined as colour1 (1,2), colour2(3,4), trump cards(5,6).
 	"""
 	agents = ["a","b","c"]
-	deck = [1,2,3,4,5,6]
+	deck = [1,2,3]
 
 	hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 	hand_cards = [hand_a, hand_b, hand_c]
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
+
+	print(ks)
+	test = "a:1"
+	ks = ks.solve(Atom(test))
+	print(ks)
+	ks = ks.solve(Atom("a:1"))
+	print(ks)
 	
 	#game_loop(agents, hand_cards, ks)
 
