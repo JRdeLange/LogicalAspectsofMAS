@@ -145,15 +145,14 @@ def get_common_knowledge(ks):
 	# Then loop through all worlds
 	for world in ks.worlds:
 		world_facts = list(world.assignment.keys())
-		to_be_removed = list()
+		to_be_removed = set()
 		# If a fact is not in a world, queue it up fo removal
 		for fact in fact_list:
 			if not fact in world_facts:
 				to_be_removed.append(fact)
 		# And then remove all of them from the fact list
 		for fact in to_be_removed:
-			if fact in fact_list:
-				fact_list.remove(fact)
+			fact_list.remove(fact)
 	return fact_list
 
 #WIP
