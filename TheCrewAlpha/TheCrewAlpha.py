@@ -1,4 +1,4 @@
-from mlsolver.kripke import World, KripkeStructure
+from kripke import World, KripkeStructure
 from mlsolver.formula import *
 from mlsolver.formula import Atom, And, Not, Or, Box_a, Box_star
 from itertools import permutations
@@ -124,6 +124,38 @@ def initialise_kripke_model(agents, deck, hand_cards):
 
 	return ks
 
+def get_list_of_facts(ks):
+	"""
+	Creates a complete list of all facts present in the model currently
+	"""
+	fact_list = list()
+	# Go through all worlds and make a list of all existing facts
+	for world in ks.worlds:
+		fact_list += list(world.assignment.keys())
+	# Remove duplicates by making it a dict and then converting back to a list
+	return list(dict.fromkeys(fact_list))
+
+
+def get_common_knowledge(ks):
+	"""
+	Generates a complete list of all the common knowlegde present in the model
+	"""
+	# First collect all facts
+	fact_list = get_list_of_facts(ks)
+	# Then loop through all worlds
+	for world in ks.worlds:
+		world_facts = list(world.assignment.keys())
+		to_be_removed = list()
+		# If a fact is not in a world, queue it up fo removal
+		for fact in fact_list:
+			if not fact in world_facts:
+				to_be_removed.append(fact)
+		# And then remove all of them from the fact list
+		for fact in to_be_removed:
+			if fact in fact_list:
+				fact_list.remove(fact)
+	return fact_list
+
 #WIP
 def game_loop(agents, hand_cards, ks):
 	"""
@@ -154,12 +186,9 @@ def The_Crew_game():
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
 
-	print(ks)
-	test = "a:1"
-	ks = ks.solve(Atom(test))
-	print(ks)
-	ks = ks.solve(Atom("a:1"))
-	print(ks)
+	ks = ks.short_solve(And(Atom("a:1"), Atom("b:2")))
+
+	print(get_common_knowledge(ks))
 	
 	#game_loop(agents, hand_cards, ks)
 
