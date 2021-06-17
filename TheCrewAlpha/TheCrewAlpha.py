@@ -5,6 +5,8 @@ from itertools import permutations
 import random
 import collections
 
+from GameManager import GameManager
+
 """
 ABOUT:
 This program should simulate the logic of the card game the crew.
@@ -176,181 +178,36 @@ def generate_mission(agents, deck):
 	Randomly selects an agent and a card
 	The mission indicates which agent should end up with which card
 	"""
+	# TODO: NO TRUMP CARDS IN MISSION
 	mission_agent = random.choice(agents)
 	mission_card = random.choice(deck)
 	return [mission_agent, mission_card]
-
-def determine_winner(trick, deck):
-	"""
-	This function determines the winner of a trick
-	It does this by looping three times (based on number of players)
-	Each loop it looks at one of the players and which card they played this trick
-	Then it selects either the highest card played of the trick suit
-	Or (if trump cards were played) the highest trump card
-	"""
-	winning_card = None
-	winning_player = None
-
-	for index in range(3):
-		if winning_card == None:
-			winning_card = trick["cards_in_trick"][index]
-			winning_player = trick["player_order"][index]
-		elif trick["trick_suit"] != "trump" and card_suit(trick["cards_in_trick"][index], deck) == "trump":
-			winning_card = trick["cards_in_trick"][index]
-			winning_player = trick["player_order"][index]
-		elif trick["cards_in_trick"][index] > winning_card and trick["trick_suit"] == card_suit(trick["cards_in_trick"][index], deck):
-			winning_card = trick["cards_in_trick"][index]
-			winning_player = trick["player_order"][index]
-
-	return winning_player
-
-def set_player_order(starting_agent, trick):
-	"""
-	This function returns the new agent order based on which agent should be the starting agent
-	"""
-	#TODO maybe find a more elegant way to do this?
-
-	if starting_agent == "a":
-		trick["player_order"] = ["a", "b", "c"]
-	elif starting_agent == "b":
-		trick["player_order"] = ["b", "c", "a"]
-	elif starting_agent == "c":
-		trick["player_order"] = ["c", "a", "b"]
-
-	return trick["player_order"]
-
-def end_trick(trick, game):
-	"""
-	This function ends the current trick
-	This means that it determines who won the trick
-	Then adds the cards of this trick to the winners cards_won pile
-	Then it resets the values of the trick, making the winning agent the first agent to play
-	"""
-	trick_suit = trick["trick_suit"]
-	winning_agent = determine_winner(trick, game["deck"])
-
-	print("The suit of this trick was", trick_suit, ". Player", winning_agent, "played the winning card and has thus won this trick.")
-	print("Player", winning_agent, "will now start the new trick.")
-
-	winning_agent_index = game["agents"].index(winning_agent)
-	game["cards_won"][winning_agent_index] += trick["cards_in_trick"]
-
-	trick["player_order"] = set_player_order(winning_agent, trick)
-	trick["cards_in_trick"] = []
-	trick["nr_of_cards_in_trick"] = 0
-	trick["trick_suit"] = None
-	return trick, game
-
-def play_card(agents, player, card, ks):
-	"""
-	This function updates the kripke model based on the card that has been revealed
-	"""
-	#TODO merge or differentiate this function from communicate_card()
-	agent_card = agents[player] + ":" + card
-	ks = ks.short_solve(Atom(agent_card))
-	print("The new kripke model:\n")
-	print(ks)
-	return ks
-
-def communicate_card(agents, player, card, ks):
-	"""
-	This function updates the kripke model based on the card that has been revealed
-	"""
-	#TODO merge or differentiate this function from play_card()
-	agent_card = agents[player] + ":" + card
-	ks = ks.short_solve(Atom(agent_card))
-	print("The new kripke model:\n")
-	print(ks)
-	return ks
-
-def card_suit(card, deck):
-	"""
-	Returns which of the three suits the card has
-	It does this by looking if the card is from the first, second or third part of the deck
-	"""
-	if (card / len(deck)) < 0.34:
-		return "color 1"
-	elif (card / len(deck)) < 0.67:
-		return "color 2"
-	return "trump"
-
-def ask_for_communicating_agent(agents):
-	"""
-	This function querries the user to say which agent they want to have communicate one of their cards
-	"""
-	agent = input("Which player would like to communicate a card?\n")
-	while agent not in agents:
-		print(str(agent), "is not a player, please try again. You can choose players:" ,agents)
-		agent = input("Which player would like to communicate a card?\n")
-	return agent
-
-def mission_passed(game):
-	"""
-	This function checks if the mission has been accomplished
-	It does this by seeing if the mission agent has the mission card in their cards_won pile
-	"""
-	Mission_agent_index = game["agents"].index(game["mission"][0])
-
-	for card in game["cards_won"][Mission_agent_index]:
-		if card == game["mission"][1]:
-			return True
-
-	return False
 
 #WIP
 def game_loop(agents, hand_cards, deck, ks):
 	"""
 	This function simulates the turns of each agent
 	"""
-	# TODO: Some cleaning up
 	# TODO: Implement some way to limit how many communications the agents can do
-	# TODO: Turn trick and game into a class (possibly merging them into a single game class)
-	trick = {	"trick_suit" : None,
-				"nr_of_cards_in_trick" : 0,
-				"cards_in_trick" : [],
-				"player_order" : agents}
+	mission = generate_mission(agents, deck)
 
-	game = {	"kripke_model" : ks,
-				"agents" : agents,
-				"deck" : deck,
-				"mission" : generate_mission(agents, deck),
-				"hand_cards" : hand_cards,
-				"cards_won" : [[] for i in range(3)]}
-
-	print("Today's mission is", game["mission"])
-
+	game = GameManager(ks, agents, deck, hand_cards, mission)
+	
+	print("Today's mission is", game.mission)	
 	mission_ongoing = True
-	current_player = 0
 
 	while mission_ongoing:
-		current_player_game_index = agents.index(trick["player_order"][current_player])
+		#current_player_game_index = agents.index(trick["player_order"][current_player])
 
-		print("It is the turn of player ", trick["player_order"][current_player])
-		print("current common_knowledge:", get_common_knowledge(ks))
+		print("It is the turn of player " + game.get_current_player_name())
+		print("current common_knowledge:" + str(get_common_knowledge(game.kripke_model)))
 		action = input("Which action do you wish to perform? (type \"play\" to play a card, \"com\" to communicate a card or \"quit\" to quit)\n")
 
 		if action == "play":
-			print("player ", trick["player_order"][current_player], " has the following cards in their hand:", hand_cards[current_player_game_index])
-			move = input("What card is played by " + str(trick["player_order"][current_player]) + "?\n")
-			print("Player ", trick["player_order"][current_player], " played card ", move)
-			ks = play_card(trick["player_order"], current_player, move, ks)
-
-			if trick["nr_of_cards_in_trick"] == 0:
-				trick["trick_suit"] = card_suit(int(move), deck)
-
-			hand_cards[current_player].remove(int(move))
-			trick["cards_in_trick"] += [int(move)]
-			trick["nr_of_cards_in_trick"] += 1
-			current_player = (current_player + 1) % 3
+			game.play_action()
 
 		elif action == "com":
-			communicating_agent = ask_for_communicating_agent(agents)
-			print("player ", communicating_agent, " has the following cards in their hand:", hand_cards[agents.index(communicating_agent)])
-			communicated_card = input("What card would " + str(communicating_agent) + " like to communicate? (type \"cancel\" to cancel)\n")
-
-			if communicated_card != "cancel":
-				print(communicating_agent + " communicated card ", communicated_card)
-				ks = communicate_card(trick["player_order"], trick["player_order"].index(communicating_agent), communicated_card, ks)
+			game.communicate_card()
 
 		elif action == "quit":
 			print("See you next time!")
@@ -359,14 +216,7 @@ def game_loop(agents, hand_cards, deck, ks):
 		else:
 			print("Invalid action, please retry.\n")
 
-		if trick["nr_of_cards_in_trick"] == len(agents):
-			trick, game = end_trick(trick, game)
-			if mission_passed(game):
-				print("Congratulations, you have passed your mission!")
-				mission_ongoing = False
-			elif not hand_cards[current_player_game_index]:
-				print("You have failed your mission, how unfortunate.")
-				mission_ongoing = False
+		mission_ongoing = game.check_end_of_trick()
 
 def The_Crew_game():
 	"""
