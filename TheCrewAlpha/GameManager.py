@@ -2,7 +2,35 @@ from kripke import World, KripkeStructure
 from mlsolver.formula import *
 from mlsolver.formula import Atom, And, Not, Or, Box_a, Box_star
 
-class GameManager(object):
+
+class Trick:
+	def __init__(self):
+		self.trick_suit = None
+		self.nr_of_cards_in_trick = 0
+		self.cards_in_trick = []
+
+	def set_trick_suit(self, trick_suit):
+		self.trick_suit = trick_suit
+
+	def get_trick_suit(self):
+		return self.trick_suit
+
+	def add_card(self, card):
+		self.cards_in_trick += [int(card)]
+		self.nr_of_cards_in_trick += 1
+
+	def add_multiple_cards(self, cards):
+		for card in cards:
+			self.cards_in_trick += [int(card)]
+			self.nr_of_cards_in_trick += 1
+
+	def get_cards(self):
+		return self.cards_in_trick
+
+	def get_nr_of_cards(self):
+		return self.nr_of_cards_in_trick
+
+class GameManager:
 	"""docstring for GameManager"""
 	def __init__(self, kripke_model, agents, deck, hand_cards, mission):
 		super(GameManager, self).__init__()
@@ -14,9 +42,7 @@ class GameManager(object):
 		self.hand_cards = hand_cards
 		self.cards_won = [[] for i in range(3)]
 
-		self.trick_suit = None
-		self.nr_of_cards_in_trick = 0
-		self.cards_in_trick = []
+		self.current_trick = Trick()
 		self.player_order = agents
 		self.current_player = 0
 
@@ -65,12 +91,11 @@ class GameManager(object):
 
 		self.kripke_model_single_card_update(self.get_current_player_name(), move)
 
-		if self.nr_of_cards_in_trick == 0:
-			self.trick_suit = self.get_card_suit(int(move))
+		if self.current_trick.get_nr_of_cards() == 0:
+			self.current_trick.set_trick_suit(self.get_card_suit(int(move)))
 
 		self.hand_cards[self.agents.index(self.player_order[self.current_player])].remove(int(move))
-		self.cards_in_trick += [int(move)]
-		self.nr_of_cards_in_trick += 1
+		self.current_trick.add_card(move)
 		self.current_player = (self.current_player + 1) % 3
 
 	def ask_for_communicating_agent(self):
@@ -111,7 +136,7 @@ class GameManager(object):
 			print(communicating_agent + " communicated card " + communicated_card)
 			self.kripke_model_single_card_update(str(communicating_agent), communicated_card)
 
-	def determine_winner(self):
+	def determine_winner(self, trick):
 		"""
 		This function determines the winner of a trick
 		It does this by looping three times (based on number of players)
@@ -121,16 +146,17 @@ class GameManager(object):
 		"""
 		winning_card = None
 		winning_player = None
+		cards_in_trick = trick.get_cards()
 
 		for index in range(3):
 			if winning_card == None:
-				winning_card = self.cards_in_trick[index]
+				winning_card = cards_in_trick[index]
 				winning_player = self.player_order[index]
-			elif self.trick_suit != "trump" and self.get_card_suit(self.cards_in_trick[index]) == "trump":
-				winning_card = self.cards_in_trick[index]
+			elif trick.get_trick_suit() != "trump" and self.get_card_suit(cards_in_trick[index]) == "trump":
+				winning_card = cards_in_trick[index]
 				winning_player = self.player_order[index]
-			elif self.cards_in_trick[index] > winning_card and self.trick_suit == self.get_card_suit(self.cards_in_trick[index]):
-				winning_card = self.cards_in_trick[index]
+			elif cards_in_trick[index] > winning_card and trick.get_trick_suit() == self.get_card_suit(cards_in_trick[index]):
+				winning_card = cards_in_trick[index]
 				winning_player = self.player_order[index]
 
 		return winning_player
@@ -156,19 +182,17 @@ class GameManager(object):
 		Then adds the cards of this trick to the winners cards_won pile
 		Then it resets the values of the trick, making the winning agent the first agent to play
 		"""
-		winning_agent = self.determine_winner()
+		winning_agent = self.determine_winner(self.current_trick)
 
-		print("The suit of this trick was", self.trick_suit, ". Player", winning_agent, "played the winning card and has thus won this trick.")
+		print("The suit of this trick was", self.current_trick.get_trick_suit(), ". Player", winning_agent, "played the winning card and has thus won this trick.")
 		print("Player", winning_agent, "will now start the new trick.")
 
 		winning_agent_index = self.agents.index(winning_agent)
-		self.cards_won[winning_agent_index] += self.cards_in_trick
+		self.cards_won[winning_agent_index] += self.current_trick.get_cards()
 
 		self.set_player_order(winning_agent)
 
-		self.cards_in_trick = []
-		self.nr_of_cards_in_trick = 0
-		self.trick_suit = None
+		self.current_trick = Trick()
 
 	def mission_passed(self):
 		"""
@@ -193,7 +217,7 @@ class GameManager(object):
 		"""
 		Checks if the trick has ended and if the win or lose condition has been met
 		"""
-		if self.nr_of_cards_in_trick == len(self.agents):
+		if self.current_trick.get_nr_of_cards() == len(self.agents):
 			self.end_trick()
 
 			if self.mission_passed():
