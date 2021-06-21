@@ -154,24 +154,41 @@ def get_list_of_facts(ks):
 	return list(dict.fromkeys(fact_list))
 
 
-def get_common_knowledge(ks):
+def get_common_knowledge(ks, agents, deck):
 	"""
 	Generates a complete list of all the common knowlegde present in the model
 	"""
-	# First collect all facts
-	fact_list = get_list_of_facts(ks)
+	# First collect all possible true facts
+	#fact_list = get_list_of_facts(ks)
+	# Generate all possible false facts
+	fact_list = list()
+	for agent in agents:
+		for card in deck:
+			fact_list.append(agent + ":" + str(card))
+	true_fact_list = fact_list.copy()
+	false_fact_list = fact_list.copy()
+
 	# Then loop through all worlds
 	for world in ks.worlds:
 		world_facts = list(world.assignment.keys())
-		to_be_removed = []
+		to_be_removed_true = []
+		to_be_removed_false = []
 		# If a fact is not in a world, queue it up fo removal
 		for fact in fact_list:
 			if not fact in world_facts:
-				to_be_removed.append(fact)
+				to_be_removed_true.append(fact)
+			else:
+				to_be_removed_false.append(fact)
 		# And then remove all of them from the fact list
-		for fact in to_be_removed:
-			fact_list.remove(fact)
-	return fact_list
+		for fact in to_be_removed_true:
+			if fact in true_fact_list:
+				true_fact_list.remove(fact)
+		for fact in to_be_removed_false:
+			if fact in false_fact_list:
+				false_fact_list.remove(fact)
+
+	false_fact_list = ["~" + e for e in false_fact_list]
+	return true_fact_list + false_fact_list
 
 def generate_mission(agents, deck):
 	"""
@@ -200,7 +217,7 @@ def game_loop(agents, hand_cards, deck, ks):
 		#current_player_game_index = agents.index(trick["player_order"][current_player])
 
 		print("It is the turn of player " + game.get_current_player_name())
-		print("current common_knowledge:" + str(get_common_knowledge(game.kripke_model)))
+		print("current common_knowledge:" + str(get_common_knowledge(game.kripke_model, agents, deck)))
 		action = input("Which action do you wish to perform? (type \"play\" to play a card, \"com\" to communicate a card or \"quit\" to quit)\n")
 
 		if action == "play":
@@ -232,9 +249,6 @@ def The_Crew_game():
 	ks = initialise_kripke_model(agents, deck, hand_cards)
 
 	game_loop(agents, hand_cards, deck, ks)
-	
-	#game_loop(agents, hand_cards, ks)
-
 
 ##### MAIN #####
 """
