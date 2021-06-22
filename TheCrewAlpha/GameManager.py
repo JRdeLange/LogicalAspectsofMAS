@@ -47,11 +47,10 @@ class GameManager:
 		for card_a in common_knowledge_hands["a"]:
 			for card_b in common_knowledge_hands["b"]:
 				for card_c in common_knowledge_hands["c"]:
-					trick = Trick()
 					cards = [card_a, card_b, card_c]
-					trick.add_multiple_cards(cards)
 					first_player = self.get_current_player_name()
-					trick.set_suit(self.get_card_suit(cards[self.player_order.index(first_player)]))
+					suit = self.get_card_suit(cards[self.player_order.index(first_player)])
+					trick = Trick(suit, cards)
 					tricks += [trick]
 
 		# If a trick is winning, print it
@@ -235,7 +234,7 @@ class GameManager:
 		Then adds the cards of this trick to the winners cards_won pile
 		Then it resets the values of the trick, making the winning agent the first agent to play
 		"""
-		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
+		print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		winning_agent = self.determine_winner(self.current_trick)
 
 		print("Player", winning_agent, "played the winning card of this trick.")
@@ -271,7 +270,7 @@ class GameManager:
 		"""
 		Checks if the trick has ended and if the win or lose condition has been met
 		"""
-		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
+		print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		if self.current_trick.get_nr_of_cards() == len(self.agents):
 			self.end_trick()
 

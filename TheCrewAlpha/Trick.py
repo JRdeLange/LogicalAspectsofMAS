@@ -1,9 +1,9 @@
 
 class Trick:
-	def __init__(self):
-		self.trick_suit = None
+	def __init__(self, trick_suit = None, cards_in_trick = []):
+		self.trick_suit = trick_suit
+		self.cards_in_trick = cards_in_trick
 		self.nr_of_cards_in_trick = 0
-		self.cards_in_trick = []
 
 	def set_suit(self, trick_suit):
 		self.trick_suit = trick_suit
