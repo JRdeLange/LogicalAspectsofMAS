@@ -153,43 +153,6 @@ def get_list_of_facts(ks):
 	# Remove duplicates by making it a dict and then converting back to a list
 	return list(dict.fromkeys(fact_list))
 
-
-def get_common_knowledge(ks, agents, deck):
-	"""
-	Generates a complete list of all the common knowlegde present in the model
-	"""
-	# First collect all possible true facts
-	#fact_list = get_list_of_facts(ks)
-	# Generate all possible false facts
-	fact_list = list()
-	for agent in agents:
-		for card in deck:
-			fact_list.append(agent + ":" + str(card))
-	true_fact_list = fact_list.copy()
-	false_fact_list = fact_list.copy()
-
-	# Then loop through all worlds
-	for world in ks.worlds:
-		world_facts = list(world.assignment.keys())
-		to_be_removed_true = []
-		to_be_removed_false = []
-		# If a fact is not in a world, queue it up fo removal
-		for fact in fact_list:
-			if not fact in world_facts:
-				to_be_removed_true.append(fact)
-			else:
-				to_be_removed_false.append(fact)
-		# And then remove all of them from the fact list
-		for fact in to_be_removed_true:
-			if fact in true_fact_list:
-				true_fact_list.remove(fact)
-		for fact in to_be_removed_false:
-			if fact in false_fact_list:
-				false_fact_list.remove(fact)
-
-	false_fact_list = ["~" + e for e in false_fact_list]
-	return true_fact_list + false_fact_list
-
 def generate_mission(agents, deck):
 	"""
 	Randomly selects an agent and a card
@@ -207,6 +170,7 @@ def game_loop(agents, hand_cards, deck, ks):
 	"""
 	# TODO: Implement some way to limit how many communications the agents can do
 	mission = generate_mission(agents, deck)
+	mission = ["a", 4]
 
 	game = GameManager(ks, agents, deck, hand_cards, mission)
 	
@@ -214,10 +178,11 @@ def game_loop(agents, hand_cards, deck, ks):
 	mission_ongoing = True
 
 	while mission_ongoing:
+		game.generate_tricks()
 		#current_player_game_index = agents.index(trick["player_order"][current_player])
 
 		print("It is the turn of player " + game.get_current_player_name())
-		print("current common_knowledge:" + str(get_common_knowledge(game.kripke_model, agents, deck)))
+		print("current common_knowledge:" + str(game.get_common_knowledge()))
 		action = input("Which action do you wish to perform? (type \"play\" to play a card, \"com\" to communicate a card or \"quit\" to quit)\n")
 
 		if action == "play":
@@ -245,6 +210,9 @@ def The_Crew_game():
 
 	hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 	hand_cards = [hand_a, hand_b, hand_c]
+	hand_cards = [[5,6],[4,2],[3,1]]
+
+	print(hand_cards)
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
 

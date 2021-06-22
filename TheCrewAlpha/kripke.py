@@ -26,13 +26,7 @@ class KripkeStructure:
         """Returns a Kripke structure with minimum sub set of nodes, that each
         of it's nodes forces a given formula.
         """
-        count = 0
-        print(len(self.get_power_set_of_worlds()))
         for i, subset in enumerate(self.get_power_set_of_worlds()):
-            print(subset)
-            count+=1
-            if count % 1 == 0:
-                print(count)
             ks = KripkeStructure(self.worlds.copy(), copy.deepcopy(self.relations))
             for element in subset:
                 ks.remove_node_by_name(element)
