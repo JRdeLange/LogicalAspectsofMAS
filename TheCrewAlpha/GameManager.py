@@ -2,10 +2,11 @@ from kripke import World, KripkeStructure
 from mlsolver.formula import *
 from mlsolver.formula import Atom, And, Not, Or, Box_a, Box_star
 from Trick import Trick
+import time
 
 class GameManager:
 	"""docstring for GameManager"""
-	def __init__(self, kripke_model, agents, deck, hand_cards, mission):
+	def __init__(self, kripke_model, agents, deck, hand_cards, mission, communications_per_agent):
 		super(GameManager, self).__init__()
 
 		self.kripke_model = kripke_model
@@ -14,6 +15,7 @@ class GameManager:
 		self.mission = mission
 		self.hand_cards = hand_cards
 		self.cards_won = [[] for i in range(3)]
+		self.nr_of_communications = [communications_per_agent for i in range(len(agents))]
 
 		self.current_trick = Trick()
 		self.player_order = agents
@@ -28,7 +30,6 @@ class GameManager:
 		played_cards = self.current_trick.get_cards()
 		for player in self.cards_won:
 			for card in player:
-				print(type(card))
 				played_cards += [card]
 
 		# Determine the cards each player has that are common knowledge
@@ -109,8 +110,20 @@ class GameManager:
 		If this is the first card of the trick it sets the trick color.
 		Finally we remove the card from the current player's hand and add it to the cards in the current trick.
 		"""
-		print("player " + self.get_current_player_name() + " has the following cards in their hand:", self.get_current_player_hand())
+		player_hand = self.get_current_player_hand()
+		has_trick_suit_card = False
+
+		for card in player_hand:
+			if self.get_card_suit(card) == self.current_trick.get_suit():
+				has_trick_suit_card = True
+
+		print("player " + self.get_current_player_name() + " has the following cards in their hand:", player_hand)
+		print("The current trick suit is", self.current_trick.get_suit())
 		move = input("What card is played by " + self.get_current_player_name() + "?\n")
+
+		while (has_trick_suit_card and self.get_card_suit(int(move)) != "trump" and self.get_card_suit(int(move)) != self.current_trick.get_suit()) or int(move) not in player_hand:
+			move = input("Invalid card. If they can, the player must follow suit. Please choose a different card.\n")
+
 		print("Player "+ self.get_current_player_name() + " played card ", move)
 
 		self.kripke_model_single_card_update(self.get_current_player_name(), move)
@@ -125,12 +138,25 @@ class GameManager:
 	def ask_for_communicating_agent(self):
 		"""
 		This function querries the user to say which agent they want to have communicate one of their cards
+		We check if this input is actually an agent and if this agent can still communicate.
 		"""
-		agent = input("Which player would like to communicate a card?\n")
+		agent = input("Which player would like to communicate a card?(type \"cancel\" to cancel)\n")
+
+		if agent == "cancel":
+			return None
+
 		while agent not in self.agents:
 			print(str(agent), "is not a player, please try again. You can choose players:" ,self.agents)
 			agent = input("Which player would like to communicate a card?\n")
-		return agent
+
+		agent_index = self.agents.index(agent)
+
+		if self.nr_of_communications[agent_index] > 0:
+			self.nr_of_communications[agent_index] -= 1
+			return agent
+		else:
+			print("This player can no longer communicate.")
+			return self.ask_for_communicating_agent()
 
 	def get_agent_hand(self, agent):
 		"""
@@ -147,6 +173,9 @@ class GameManager:
 		Finally it updates the kripke model with the revealed card.
 		"""
 		communicating_agent = self.ask_for_communicating_agent()
+
+		if communicating_agent == None:
+			return
 
 		print("player ", communicating_agent, " has the following cards in their hand:", self.get_agent_hand(communicating_agent))
 
@@ -206,17 +235,17 @@ class GameManager:
 		Then adds the cards of this trick to the winners cards_won pile
 		Then it resets the values of the trick, making the winning agent the first agent to play
 		"""
+		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		winning_agent = self.determine_winner(self.current_trick)
 
-		print("The suit of this trick was", self.current_trick.get_suit(), ". Player", winning_agent, "played the winning card and has thus won this trick.")
+		print("Player", winning_agent, "played the winning card of this trick.")
 		print("Player", winning_agent, "will now start the new trick.")
 
 		winning_agent_index = self.agents.index(winning_agent)
 		self.cards_won[winning_agent_index] += self.current_trick.get_cards()
-
-		self.set_player_order(winning_agent)
-
+		#####BUG: TRICK RESET IS BEING WEIRD AND NOT WORKING#####
 		self.current_trick = Trick()
+		self.set_player_order(winning_agent)
 
 	def mission_passed(self):
 		"""
@@ -224,6 +253,7 @@ class GameManager:
 		It does this by seeing if the mission agent has the mission card in their cards_won pile
 		"""
 		Mission_agent_index = self.agents.index(self.mission[0])
+		#print(self.cards_won, "----------------------------")
 
 		for card in self.cards_won[Mission_agent_index]:
 			if card == self.mission[1]:
@@ -241,6 +271,7 @@ class GameManager:
 		"""
 		Checks if the trick has ended and if the win or lose condition has been met
 		"""
+		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		if self.current_trick.get_nr_of_cards() == len(self.agents):
 			self.end_trick()
 

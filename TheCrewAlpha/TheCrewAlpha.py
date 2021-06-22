@@ -158,29 +158,24 @@ def generate_mission(agents, deck):
 	Randomly selects an agent and a card
 	The mission indicates which agent should end up with which card
 	"""
-	# TODO: NO TRUMP CARDS IN MISSION
 	mission_agent = random.choice(agents)
 	mission_card = random.choice(deck)
+	while (mission_card / len(deck)) > 0.67:
+		mission_card = random.choice(deck)
 	return [mission_agent, mission_card]
 
 #WIP
-def game_loop(agents, hand_cards, deck, ks):
+def game_loop(game):
 	"""
 	This function simulates the turns of each agent
-	"""
-	# TODO: Implement some way to limit how many communications the agents can do
-	mission = generate_mission(agents, deck)
-	mission = ["a", 4]
-
-	game = GameManager(ks, agents, deck, hand_cards, mission)
-	
-	print("Today's mission is", game.mission)	
+	"""	
 	mission_ongoing = True
 
 	while mission_ongoing:
 		game.generate_tricks()
 		#current_player_game_index = agents.index(trick["player_order"][current_player])
-
+		print("")
+		print("")
 		print("It is the turn of player " + game.get_current_player_name())
 		print("current common_knowledge:" + str(game.get_common_knowledge()))
 		action = input("Which action do you wish to perform? (type \"play\" to play a card, \"com\" to communicate a card or \"quit\" to quit)\n")
@@ -207,16 +202,22 @@ def The_Crew_game():
 	"""
 	agents = ["a","b","c"]
 	deck = [1,2,3,4,5,6]
+	communications_per_agent = 1
 
 	hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 	hand_cards = [hand_a, hand_b, hand_c]
-	hand_cards = [[5,6],[4,2],[3,1]]
 
 	print(hand_cards)
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
 
-	game_loop(agents, hand_cards, deck, ks)
+	mission = generate_mission(agents, deck)
+
+	game = GameManager(ks, agents, deck, hand_cards, mission, communications_per_agent)
+	
+	print("Today's mission is", game.mission)
+
+	game_loop(game)
 
 ##### MAIN #####
 """
