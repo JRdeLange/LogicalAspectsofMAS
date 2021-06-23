@@ -6,12 +6,13 @@ import time
 
 class GameManager:
 	"""docstring for GameManager"""
-	def __init__(self, kripke_model, agents, deck, hand_cards, mission, communications_per_agent):
+	def __init__(self, kripke_model, agents, deck, hand_cards, mission, communications_per_agent, real_world):
 		super(GameManager, self).__init__()
 
 		self.kripke_model = kripke_model
 		self.agents = agents
 		self.deck = deck
+		
 		self.mission = mission
 		self.hand_cards = hand_cards
 		self.cards_won = [[] for i in range(3)]
@@ -20,6 +21,52 @@ class GameManager:
 		self.current_trick = Trick()
 		self.player_order = agents
 		self.current_player = 0
+
+		self.real_world = real_world
+
+	def world_connected(self, model_worlds, model_relations, test_world):
+		"""
+		Checks a worlds against a list of worlds and a list of relations
+		If the worlds is connected to any world in the list of worlds based
+		on the list of relation, return True 
+		"""
+		for agent in model_relations:
+			for relation in model_relations[agent]:
+				for world in model_worlds:
+					if test_world in relation and world.name in relation:
+						return True
+		return False
+
+
+	def generate_two_agent_model(self, kripke_model, agent_1, agent_2, source_world):
+		"""
+		Generates a kripke model that only has the worlds and relations of two of its agents
+		connected to a source world. 
+		This makes sure a connected graph is created and due to the fact that we know each agent
+		considers the real world possible, will make sure that only the knowledge of the third
+		agent is lost, if the real world is used as source world.
+		"""
+		two_agent_model_relations = {
+					agent_1: kripke_model.relations[agent_1],
+					agent_2: kripke_model.relations[agent_2]
+					}
+
+		two_agent_model_worlds = []
+
+		for world in kripke_model.worlds:
+			if not world in two_agent_model_worlds:
+				if world.name == source_world:
+					two_agent_model_worlds.append(World(world.name, world.assignment))
+				elif world_connected(two_agent_model_worlds, two_agent_model_relations, world.name):
+					two_agent_model_worlds.append(World(world.name, world.assignment))
+
+		two_agent_model = KripkeStructure(kripke_model.worlds,two_agent_model_relations)
+
+		for world in two_agent_model.worlds:
+			if world not in two_agent_model_worlds:
+				two_agent_model.remove_node_by_name(world.name)
+
+		return(two_agent_model)
 
 	def generate_tricks(self):
 		"""

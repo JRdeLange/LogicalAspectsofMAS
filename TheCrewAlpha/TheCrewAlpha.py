@@ -210,10 +210,17 @@ def The_Crew_game():
 	print(hand_cards)
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
-
 	mission = generate_mission(agents, deck)
 
-	game = GameManager(ks, agents, deck, hand_cards, mission, communications_per_agent)
+	real_world = []
+
+	for hand in hand_cards:
+		for card in hand:
+			real_world.append(str(card))
+
+	real_world = "".join(real_world)
+	
+	game = GameManager(ks, agents, deck, hand_cards, mission, communications_per_agent, real_world)
 	
 	print("Today's mission is", game.mission)
 
