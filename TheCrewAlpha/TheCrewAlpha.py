@@ -172,7 +172,7 @@ def game_loop(game):
 	mission_ongoing = True
 
 	while mission_ongoing:
-		game.generate_tricks()
+		game.is_game_winnable()
 		#current_player_game_index = agents.index(trick["player_order"][current_player])
 		print("")
 		print("")
@@ -202,7 +202,7 @@ def The_Crew_game():
 	"""
 	agents = ["a","b","c"]
 	deck = [1,2,3,4,5,6]
-	communications_per_agent = 1
+	communications_per_agent = 2
 
 	hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 	hand_cards = [hand_a, hand_b, hand_c]
@@ -211,6 +211,7 @@ def The_Crew_game():
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
 	mission = generate_mission(agents, deck)
+	mission = ["a", 2]
 
 	real_world = []
 
