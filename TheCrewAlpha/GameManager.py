@@ -234,7 +234,7 @@ class GameManager:
 		Then adds the cards of this trick to the winners cards_won pile
 		Then it resets the values of the trick, making the winning agent the first agent to play
 		"""
-		print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
+		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		winning_agent = self.determine_winner(self.current_trick)
 
 		print("Player", winning_agent, "played the winning card of this trick.")
@@ -242,8 +242,8 @@ class GameManager:
 
 		winning_agent_index = self.agents.index(winning_agent)
 		self.cards_won[winning_agent_index] += self.current_trick.get_cards()
-		#####BUG: TRICK RESET IS BEING WEIRD AND NOT WORKING#####
-		self.current_trick = Trick()
+		self.current_trick.reset()
+		
 		self.set_player_order(winning_agent)
 
 	def mission_passed(self):
@@ -270,9 +270,10 @@ class GameManager:
 		"""
 		Checks if the trick has ended and if the win or lose condition has been met
 		"""
-		print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
+		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		if self.current_trick.get_nr_of_cards() == len(self.agents):
 			self.end_trick()
+
 
 			if self.mission_passed():
 				print("Congratulations, you have passed your mission!")
