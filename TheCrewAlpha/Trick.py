@@ -5,6 +5,11 @@ class Trick:
 		self.cards_in_trick = cards_in_trick
 		self.nr_of_cards_in_trick = 0
 
+	def reset(self):
+		self.trick_suit = None
+		self.cards_in_trick = []
+		self.nr_of_cards_in_trick = 0
+
 	def set_suit(self, trick_suit):
 		self.trick_suit = trick_suit
 

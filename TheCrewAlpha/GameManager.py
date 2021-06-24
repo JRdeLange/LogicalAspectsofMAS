@@ -100,6 +100,7 @@ class GameManager:
 		# Determine the cards each player has that are common knowledge
 		playable_cards = {"a" : [], "b" : [], "c" : []}
 		common_knowledge = []
+
 		if len(not_played_yet) == 3:
 			# If no card has been played yet in the current trick we get common knowledge from the complete model
 			common_knowledge = self.get_positive_common_knowledge(self.kripke_model)
@@ -109,7 +110,7 @@ class GameManager:
 			common_knowledge = self.get_positive_common_knowledge(model)
 			# The first player already played, so their card is already set.
 			playable_cards[self.player_order[0]] = self.current_trick.get_cards()
-		else:
+		elif len(not_played_yet) == 1:
 			# If two cards have been played no knowledge matters anymore, only all the cards in the hand of the last player do
 			playable_cards[self.player_order[0]] = [self.current_trick.get_cards()[0]]
 			playable_cards[self.player_order[1]] = [self.current_trick.get_cards()[1]]
@@ -316,7 +317,7 @@ class GameManager:
 
 		winning_agent_index = self.agents.index(winning_agent)
 		self.cards_won[winning_agent_index] += self.current_trick.get_cards()
-		self.current_trick = Trick()
+		self.current_trick.reset()
 		
 		self.set_player_order(winning_agent)
 
