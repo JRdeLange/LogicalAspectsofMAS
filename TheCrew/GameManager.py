@@ -124,15 +124,15 @@ class GameManager:
 			player = fact[0]
 			if not card in played_cards and player in not_played_yet:
 				playable_cards[player] += [card]
-
-		print(playable_cards)
 		
+		print(playable_cards)
+
 		# Put all the pieces together and actually generate the tricks
 		tricks = []
-		for card_a in playable_cards["a"]:
-			for card_b in playable_cards["b"]:
-				for card_c in playable_cards["c"]:
-					cards = [card_a, card_b, card_c]
+		for card_1 in playable_cards[self.player_order[0]]:
+			for card_2 in playable_cards[self.player_order[1]]:
+				for card_3 in playable_cards[self.player_order[2]]:
+					cards = [card_1, card_2, card_3]
 					first_player = self.player_order[0]
 					suit = self.get_card_suit(cards[self.player_order.index(first_player)])
 					trick = Trick(suit, cards)
