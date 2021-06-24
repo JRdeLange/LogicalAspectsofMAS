@@ -20,7 +20,10 @@ class GameManager:
 
 		self.current_trick = Trick()
 		self.player_order = agents
-		self.current_player = 0
+		self.current_player = self.get_commander()
+		self.set_player_order(self.player_order[0])
+
+		self.kripke_model_single_card_update(self.player_order[self.current_player], str(6))
 
 		self.real_world = real_world
 
@@ -158,9 +161,18 @@ class GameManager:
 		hand_index = self.agents.index(self.get_current_player_name())
 		return self.hand_cards[hand_index]
 
+	def get_commander(self):
+		"""
+		Returns the commander of a game; the player who has the highest trump-card
+		"""
+		for player in range(len(self.hand_cards)):
+			for card in range(len(self.hand_cards[player])):
+				if self.hand_cards[player][card] == 6:
+					return player
+
 	def kripke_model_single_card_update(self, agent, card):
 		"""
-		Updates the kripke model based on a specifik card becoming common knowledge
+		Updates the kripke model based on a specific card becoming common knowledge
 		"""
 		agent_card = agent + ":" + card
 		self.kripke_model = self.kripke_model.solve(Atom(agent_card))
