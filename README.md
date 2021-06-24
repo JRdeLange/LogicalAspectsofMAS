@@ -6,6 +6,6 @@ Using this the program can then warm any player when they should know that the c
 
 # How to run
 
-1. Download mlsolver from https://github.com/erohkohl/mlsolver and follow the installation instructions (Alternatively, if unable to install mlsolver, move the "formula.py" file from the "emergency" folder to the "TheCrew" folder, and replace "from mlsolver.formula"(line 2) in "TheCrew.py" with "from formula")
+1. Download mlsolver from https://github.com/erohkohl/mlsolver and follow the installation instructions (Alternatively, if unable to install mlsolver, move the "formula.py" and "kripke.py" files from the "emergency" folder to the "TheCrew" folder, and replace "from mlsolver.kripke" line 1) in "TheCrew.py" and "GameManager.py" with "from kripke" and similarly replace "from mlsolver.formula" (line 2) in "TheCrew.py" and "GameManager.py" with "from formula")
 
-2. Run "python TheCrewAlpha/TheCrewAlpha.py"
+2. Run "python TheCrew/TheCrew.py"

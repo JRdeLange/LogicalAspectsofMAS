@@ -1,4 +1,4 @@
-from kripke import World, KripkeStructure
+from mlsolver.kripke import World, KripkeStructure
 from mlsolver.formula import *
 from Trick import Trick
 import time
@@ -89,7 +89,7 @@ class GameManager:
 		Generates possible tricks in the current scenario.
 		"""
 		# Determine which players yet to play this trick
-		print(self.get_positive_common_knowledge(self.generate_two_agent_model(self.kripke_model, "b", "c", self.real_world)))
+		#print(self.get_positive_common_knowledge(self.generate_two_agent_model(self.kripke_model, "b", "c", self.real_world)))
 		not_played_yet = self.player_order[self.current_trick.get_nr_of_cards():]
 		cards_played_this_trick = self.current_trick.get_cards()
 
@@ -125,7 +125,7 @@ class GameManager:
 			if not card in played_cards and player in not_played_yet:
 				playable_cards[player] += [card]
 		
-		print(playable_cards)
+		#print(playable_cards)
 
 		# Put all the pieces together and actually generate the tricks
 		tricks = []
@@ -136,16 +136,21 @@ class GameManager:
 					first_player = self.player_order[0]
 					suit = self.get_card_suit(cards[self.player_order.index(first_player)])
 					trick = Trick(suit, cards)
-					print(cards)
 					if self.check_if_trick_valid(trick):
-						print("valid :)")
 						tricks += [trick]
+
+		if len(tricks) > 0:
+			print("Valid tricks that all players yet to play know can be played now:")
+			for trick in tricks:
+				print("    " + str(trick.get_cards()))
 
 		# If a trick is winning, print it
 		for trick in tricks:
 			winning_agent = self.determine_winner(trick)
 			if self.mission[0] == winning_agent and self.mission[1] in trick.get_cards():
-				print("Winning trick is", trick.get_cards())
+				print("Of these, a winning trick is:", trick.get_cards())
+
+		if len(tricks) > 0: print("")
 
 	def get_current_player_name(self):
 		"""
@@ -202,12 +207,12 @@ class GameManager:
 			if self.get_card_suit(card) == self.current_trick.get_suit():
 				has_trick_suit_card = True
 
-		print("player " + self.get_current_player_name() + " has the following cards in their hand:", player_hand)
-		print("The current trick suit is", self.current_trick.get_suit())
-		move = input("What card is played by " + self.get_current_player_name() + "?\n")
+		print("Player " + self.get_current_player_name() + " has the following cards in their hand:", player_hand)
+		if self.current_trick.get_suit() != None: print("The current trick suit is", self.current_trick.get_suit())
+		move = input("What card is played by player " + self.get_current_player_name() + "?\n")
 
 		while (not move.isnumeric()) or (has_trick_suit_card and self.get_card_suit(int(move)) != "trump" and self.get_card_suit(int(move)) != self.current_trick.get_suit()) or int(move) not in player_hand:
-			move = input("Invalid card. If they can, the player must follow suit. Please choose a different card.\n")
+			move = input("Invalid card. If they can, a player must follow suit. Please choose a different card.\n")
 
 		print("Player "+ self.get_current_player_name() + " played card ", move)
 
@@ -225,7 +230,8 @@ class GameManager:
 		This function querries the user to say which agent they want to have communicate one of their cards
 		We check if this input is actually an agent and if this agent can still communicate.
 		"""
-		agent = input("Which player would like to communicate a card?(type \"cancel\" to cancel)\n")
+		agent = input("Which player (a, b or c) would like to communicate a card? (type \"cancel\" to cancel)\n")
+		print("")
 
 		if agent == "cancel":
 			return None
@@ -233,6 +239,8 @@ class GameManager:
 		while agent not in self.agents:
 			print(str(agent), "is not a player, please try again. You can choose players:" ,self.agents)
 			agent = input("Which player would like to communicate a card?\n")
+			print("")
+
 
 		agent_index = self.agents.index(agent)
 
@@ -262,7 +270,7 @@ class GameManager:
 		if communicating_agent == None:
 			return
 
-		print("player ", communicating_agent, " has the following cards in their hand:", self.get_agent_hand(communicating_agent))
+		print("Player", communicating_agent, "has the following cards in their hand:", self.get_agent_hand(communicating_agent))
 
 		communicated_card = input("What card would " + str(communicating_agent) + " like to communicate? (type \"cancel\" to cancel)\n")
 

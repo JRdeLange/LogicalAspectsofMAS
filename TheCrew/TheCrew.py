@@ -1,4 +1,4 @@
-from kripke import World, KripkeStructure
+from mlsolver.kripke import World, KripkeStructure
 from mlsolver.formula import *
 from itertools import permutations
 import random
@@ -134,8 +134,8 @@ def initialise_kripke_model(agents, deck, hand_cards):
 
 	relations = initialise_relations(agents, deck, worlds)
 
-	print("Worlds: ", len(worlds))
-	print("Relations: ", (len(relations["a"]) + len(relations["b"]) + len(relations["c"])))
+	#print("Worlds: ", len(worlds))
+	#print("Relations: ", (len(relations["a"]) + len(relations["b"]) + len(relations["c"])))
 
 	ks = KripkeStructure(worlds, relations)
 
@@ -171,13 +171,31 @@ def game_loop(game):
 	mission_ongoing = True
 
 	while mission_ongoing:
+
+
+
+		print("Today's mission is for player " + game.mission[0] + " to obtain card number", game.mission[1])
+		print("")
+
+		print("The hands are currently as follows:")
+		for i in range(3):
+			print("    Hand of player " + game.agents[i] + ":", game.hand_cards[i])
+		print("")
+
+
 		game.is_game_winnable()
-		#current_player_game_index = agents.index(trick["player_order"][current_player])
+		#current_player_game_index = agents.index(trick["player_order"][current_player])print("It is the turn of player " + game.get_current_player_name())
+		print("This is the current common knowledge:")# + str(game.get_common_knowledge()))
+		for fact in sorted(game.get_common_knowledge()):
+			if fact[0] != "~":
+				print("    Player " + fact[0] + " was dealt card number", fact[2])
+			else:
+				print("    Player " + fact[1] + " was not dealt card number", fact[3])
 		print("")
-		print("")
-		print("It is the turn of player " + game.get_current_player_name())
-		print("current common_knowledge:" + str(game.get_common_knowledge()))
+
+
 		action = input("Which action do you wish to perform? (type \"play\" to play a card, \"com\" to communicate a card or \"quit\" to quit)\n")
+		print("")
 
 		if action == "play":
 			game.play_action()
@@ -192,6 +210,11 @@ def game_loop(game):
 		else:
 			print("Invalid action, please retry.\n")
 
+		print("")
+		print("+----------+----------+----------+")
+		print("")
+
+
 		mission_ongoing = game.check_end_of_trick()
 
 def The_Crew_game():
@@ -199,14 +222,16 @@ def The_Crew_game():
 	We initialise the kripke model based on the number of agents, "cards" in the deck and the cards in the hands of the agents
 	Cards can be defined as colour1 (1,2), colour2(3,4), trump cards(5,6).
 	"""
+
+	print("")
+	print("Initializing Kripke model, this may take a few seconds")
+
 	agents = ["a","b","c"]
 	deck = [1,2,3,4,5,6]
 	communications_per_agent = 2
 
 	hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 	hand_cards = [hand_a, hand_b, hand_c]
-
-	print(hand_cards)
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
 	mission = generate_mission(agents, deck)
@@ -221,7 +246,13 @@ def The_Crew_game():
 	
 	game = GameManager(ks, agents, deck, hand_cards, mission, communications_per_agent, real_world)
 	
-	print("Today's mission is", game.mission)
+	print("""
+    +--------------------+
+    |     Welcome to     |
+    |                    |
+    |      THE CREW      |
+    +--------------------+
+""")
 
 	game_loop(game)
 
