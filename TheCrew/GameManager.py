@@ -1,6 +1,5 @@
 from kripke import World, KripkeStructure
 from mlsolver.formula import *
-from mlsolver.formula import Atom, And, Not, Or, Box_a, Box_star
 from Trick import Trick
 import time
 
@@ -20,9 +19,9 @@ class GameManager:
 
 		self.current_trick = Trick()
 		self.player_order = agents
-		self.current_player = self.get_commander()
-		self.set_player_order(self.player_order[0])
+		self.current_player = 0
 
+		self.set_player_order(agents[self.get_commander()])
 		self.kripke_model_single_card_update(self.player_order[self.current_player], str(6))
 
 		self.real_world = real_world

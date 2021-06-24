@@ -1,6 +1,5 @@
 from kripke import World, KripkeStructure
 from mlsolver.formula import *
-from mlsolver.formula import Atom, And, Not, Or, Box_a, Box_star
 from itertools import permutations
 import random
 import collections
@@ -211,7 +210,6 @@ def The_Crew_game():
 
 	ks = initialise_kripke_model(agents, deck, hand_cards)
 	mission = generate_mission(agents, deck)
-	mission = ["a", 2]
 
 	real_world = []
 
