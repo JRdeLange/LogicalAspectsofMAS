@@ -34,7 +34,6 @@ def generate_accessible_worlds(possible_worlds, hand_cards):
 		for agent in range(nr_of_agents):
 			same_hand = True
 			for card in range(nr_of_cards_in_hand):
-				# TODO: Is hieronder 0 of agent handiger? Het zou altijd dezelfde lengte moeten hebben maar weet niet wat jullie netter vinden
 				if not world[(agent) * nr_of_cards_in_hand + card] == hand_cards[agent][card]:
 					same_hand = False
 			# if all cards in this agents hand match, then this world is accessible from the real world
@@ -134,9 +133,6 @@ def initialise_kripke_model(agents, deck, hand_cards):
 
 	relations = initialise_relations(agents, deck, worlds)
 
-	#print("Worlds: ", len(worlds))
-	#print("Relations: ", (len(relations["a"]) + len(relations["b"]) + len(relations["c"])))
-
 	ks = KripkeStructure(worlds, relations)
 
 	return ks
@@ -164,13 +160,16 @@ def generate_mission(agents, deck):
 	return [mission_agent, mission_card]
 
 def print_rules():
+	"""
+	A function which prints the rules of the game and gives a short explanation of what this program does.
+	"""
 	print("")
 	print("Rules and Explanation:")
 	print("In this version of The Crew, the players work together to make sure a specific player gets a specific card.")
 	print("The cards are numbered 1 to 6. Cards 1 and 2 are of suit 1, cards 3 and 4 are of suit 2 and cards 5 and 6 are trump cards.")
 	print("")
 	print("The game is played in rounds called tricks. In a trick each player plays one card. The first card played determines the suit of the trick.")
-	print("Subsequent cards have to be of the same suit, unless a player does not have any cards of that suit. Trump cards can always be played.")
+	print("Subsequent cards have to be of the same suit, unless a player does not have any cards of that suit.")
 	print("At the end of a trick, the winner is the player that played the highest card of the trick suit.")
 	print("If one or more trump cards were played the winner is instead the player that played the highest trump card.")
 	print("The winner of a trick gets the cards played during that trick in their won cards pile. This is how the mission can be accomplished.")
@@ -187,8 +186,6 @@ def print_rules():
 	print("")
 	input("pres enter to continue with the game.")
 
-
-#WIP
 def game_loop(game):
 	"""
 	This function simulates the turns of each agent
@@ -207,10 +204,9 @@ def game_loop(game):
 			print("    Hand of player " + game.agents[i] + ":", game.hand_cards[i])
 		print("")
 
-
 		game.is_game_winnable()
-		#current_player_game_index = agents.index(trick["player_order"][current_player])print("It is the turn of player " + game.get_current_player_name())
-		print("This is the current common knowledge:")# + str(game.get_common_knowledge()))
+
+		print("This is the current common knowledge:")
 		for fact in sorted(game.get_common_knowledge()):
 			if fact[0] != "~":
 				print("    Player " + fact[0] + " was dealt card number", fact[2])
@@ -254,9 +250,8 @@ def game_loop(game):
 def The_Crew_game():
 	"""
 	We initialise the kripke model based on the number of agents, "cards" in the deck and the cards in the hands of the agents
-	Cards can be defined as colour1 (1,2), colour2(3,4), trump cards(5,6).
+	Cards can be defined as suit 1 (1,2), suit 2 (3,4), trump suit(5,6).
 	"""
-
 	print("")
 	print("Initializing Kripke model, this may take a few seconds")
 

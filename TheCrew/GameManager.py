@@ -4,9 +4,7 @@ from Trick import Trick
 import time
 
 class GameManager:
-	"""docstring for GameManager"""
 	def __init__(self, kripke_model, agents, deck, hand_cards, mission, communications_per_agent, real_world):
-		super(GameManager, self).__init__()
 
 		self.kripke_model = kripke_model
 		self.agents = agents
@@ -71,12 +69,12 @@ class GameManager:
 		cards = trick.get_cards();
 		suit = trick.get_suit();
 
-		if self.get_card_suit(cards[1]) != suit and self.get_card_suit(cards[1]) != "trump":
+		if self.get_card_suit(cards[1]) != suit:
 			for card in self.get_agent_hand(self.player_order[1]):
 				if self.get_card_suit(card) == suit:
 					return False
 
-		if self.get_card_suit(cards[2]) != suit and self.get_card_suit(cards[2]) != "trump":
+		if self.get_card_suit(cards[2]) != suit:
 			for card in self.get_agent_hand(self.player_order[2]):
 				if self.get_card_suit(card) == suit:
 					return False
@@ -89,7 +87,6 @@ class GameManager:
 		Generates possible tricks in the current scenario.
 		"""
 		# Determine which players yet to play this trick
-		#print(self.get_positive_common_knowledge(self.generate_two_agent_model(self.kripke_model, "b", "c", self.real_world)))
 		not_played_yet = self.player_order[self.current_trick.get_nr_of_cards():]
 		cards_played_this_trick = self.current_trick.get_cards()
 
@@ -124,8 +121,6 @@ class GameManager:
 			player = fact[0]
 			if not card in played_cards and player in not_played_yet:
 				playable_cards[player] += [card]
-		
-		#print(playable_cards)
 
 		# Put all the pieces together and actually generate the tricks
 		tricks = []
@@ -211,7 +206,7 @@ class GameManager:
 		if self.current_trick.get_suit() != None: print("The current trick suit is", self.current_trick.get_suit())
 		move = input("What card is played by player " + self.get_current_player_name() + "?\n")
 
-		while (not move.isnumeric()) or (has_trick_suit_card and self.get_card_suit(int(move)) != "trump" and self.get_card_suit(int(move)) != self.current_trick.get_suit()) or int(move) not in player_hand:
+		while (not move.isnumeric()) or (has_trick_suit_card and self.get_card_suit(int(move)) != self.current_trick.get_suit()) or int(move) not in player_hand:
 			move = input("Invalid card. If they can, a player must follow suit. Please choose a different card.\n")
 
 		print("Player "+ self.get_current_player_name() + " played card ", move)
@@ -328,7 +323,6 @@ class GameManager:
 		Then adds the cards of this trick to the winners cards_won pile
 		Then it resets the values of the trick, making the winning agent the first agent to play
 		"""
-		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		winning_agent = self.determine_winner(self.current_trick)
 
 		print("Player", winning_agent, "played the winning card of this trick.")
@@ -345,7 +339,6 @@ class GameManager:
 		It does this by seeing if the mission agent has the mission card in their cards_won pile
 		"""
 		Mission_agent_index = self.agents.index(self.mission[0])
-		#print(self.cards_won, "----------------------------")
 
 		for card in self.cards_won[Mission_agent_index]:
 			if card == self.mission[1]:
@@ -363,7 +356,6 @@ class GameManager:
 		"""
 		Checks if the trick has ended and if the win or lose condition has been met
 		"""
-		#print("--------------------------------",self.current_trick.get_nr_of_cards(), self.current_trick.get_cards())
 		if self.current_trick.get_nr_of_cards() == len(self.agents):
 			self.end_trick()
 
@@ -385,42 +377,33 @@ class GameManager:
 		"""
 		Generates a complete list of all the common knowlegde present in the model
 		"""
-		# First collect all possible true facts
-		#fact_list = get_list_of_facts(ks)
-		# Generate all possible false facts
+		# Generate all possible facts
 		fact_list = list()
 		for agent in self.agents:
 			for card in self.deck:
 				fact_list.append(agent + ":" + str(card))
 		true_fact_list = fact_list.copy()
-		#print("fact_list:", fact_list)
 
 		# Then loop through all worlds
 		for world in ks.worlds:
-			#print(world.name)
 			world_facts = list(world.assignment.keys())
-			#print(world_facts)
 			to_be_removed_true = []
 			# If a fact is not in a world, queue it up fo removal
 			for fact in fact_list:
 				if not fact in world_facts:
 					to_be_removed_true.append(fact)
 			# And then remove all of them from the fact list
-			#print(to_be_removed_true)
 			for fact in to_be_removed_true:
 				if fact in true_fact_list:
 					true_fact_list.remove(fact)
 
-		#print("Final list:", true_fact_list)
 		return true_fact_list
 
 	def get_common_knowledge(self):
 		"""
 		Generates a complete list of all the common knowlegde present in the model
 		"""
-		# First collect all possible true facts
-		#fact_list = get_list_of_facts(ks)
-		# Generate all possible false facts
+		# Generate all possible facts
 		fact_list = list()
 		for agent in self.agents:
 			for card in self.deck:
