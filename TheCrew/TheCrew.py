@@ -210,12 +210,12 @@ def game_loop(game):
 		else:
 			print("Invalid action, please retry.\n")
 
+		mission_ongoing = game.check_end_of_trick()
+
 		print("")
 		print("+----------+----------+----------+")
 		print("")
 
-
-		mission_ongoing = game.check_end_of_trick()
 
 def The_Crew_game():
 	"""

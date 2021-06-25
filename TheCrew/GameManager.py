@@ -332,7 +332,6 @@ class GameManager:
 		winning_agent = self.determine_winner(self.current_trick)
 
 		print("Player", winning_agent, "played the winning card of this trick.")
-		print("Player", winning_agent, "will now start the new trick.")
 
 		winning_agent_index = self.agents.index(winning_agent)
 		self.cards_won[winning_agent_index] += self.current_trick.get_cards()
@@ -370,11 +369,15 @@ class GameManager:
 
 
 			if self.mission_passed():
+				print("Player", self.mission[0], "has obtained card", str(self.mission[1]) + "!")
 				print("Congratulations, you have passed your mission!")
 				return False
 			elif self.current_player_hand_empty():
 				print("You have failed your mission, how unfortunate.")
 				return False
+			print("Player", self.player_order[0], "will now start the new trick.")
+
+		
 
 		return True
 
