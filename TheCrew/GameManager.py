@@ -230,7 +230,7 @@ class GameManager:
 		This function querries the user to say which agent they want to have communicate one of their cards
 		We check if this input is actually an agent and if this agent can still communicate.
 		"""
-		agent = input("Which player (a, b or c) would like to communicate a card? (type \"cancel\" to cancel)\n")
+		agent = input("Which player (" + self.agents[0] + " ," + self.agents[1] + " or " + self.agents[2] + ") would like to communicate a card? (type \"cancel\" to cancel)\n")
 		print("")
 
 		if agent == "cancel":

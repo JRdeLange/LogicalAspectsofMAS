@@ -163,6 +163,31 @@ def generate_mission(agents, deck):
 		mission_card = random.choice(deck)
 	return [mission_agent, mission_card]
 
+def print_rules():
+	print("")
+	print("Rules and Explanation:")
+	print("In this version of The Crew, the players work together to make sure a specific player gets a specific card.")
+	print("The cards are numbered 1 to 6. Cards 1 and 2 are of suit 1, cards 3 and 4 are of suit 2 and cards 5 and 6 are trump cards.")
+	print("")
+	print("The game is played in rounds called tricks. In a trick each player plays one card. The first card played determines the suit of the trick.")
+	print("Subsequent cards have to be of the same suit, unless a player does not have any cards of that suit. Trump cards can always be played.")
+	print("At the end of a trick, the winner is the player that played the highest card of the trick suit.")
+	print("If one or more trump cards were played the winner is instead the player that played the highest trump card.")
+	print("The winner of a trick gets the cards played during that trick in their won cards pile. This is how the mission can be accomplished.")
+	print("")
+	print("At any moment a player can choose to communicate one of the cards in their hand to the other palyers. Each player can only do this once during the game.")
+	print("This program assists by keeping track of the cards communicated and showing the player which facts everyone should be aware of.")
+	print("During play the program will also tell the player which tricks they should know can happen during this round.")
+	print("It will also say if any of those will result in accomplishing the mission.")
+	print("")
+	print("minor note: each turn the hand cards of the palyers are printed.")
+	print("This is to make it easier for the user to create specific situations and this is not considered to be known by the individual players.")
+	print("")
+	print("That was the explanation, good luck and have fun.")
+	print("")
+	input("pres enter to continue with the game.")
+
+
 #WIP
 def game_loop(game):
 	"""
@@ -193,6 +218,12 @@ def game_loop(game):
 				print("    Player " + fact[1] + " was not dealt card number", fact[3])
 		print("")
 
+		print("The current trick has these cards in it:")
+		print(game.current_trick.get_cards())
+		print("")
+
+		print("It is the turn of player " + game.get_current_player_name())
+		print("")
 
 		action = input("Which action do you wish to perform? (type \"play\" to play a card, \"com\" to communicate a card or \"quit\" to quit)\n")
 		print("")
@@ -206,6 +237,9 @@ def game_loop(game):
 		elif action == "quit":
 			print("See you next time!")
 			break
+
+		elif action == "rules":
+			print_rules()
 
 		else:
 			print("Invalid action, please retry.\n")
@@ -253,6 +287,8 @@ def The_Crew_game():
     |      THE CREW      |
     +--------------------+
 """)
+	print("For rules and explanation, type: \"rules\"")
+	print("")
 
 	game_loop(game)
 
