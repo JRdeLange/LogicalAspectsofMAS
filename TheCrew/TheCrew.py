@@ -15,16 +15,16 @@ The goals is to be able to do this for at least 3 players and a deck of at least
 
 def deal_cards(deck, number_of_agents):
     """
-	This function randomly divides the items of the deck over the number of agents
-	"""
+    This function randomly divides the items of the deck over the number of agents
+    """
     random.shuffle(deck)
     return [deck[agent::number_of_agents] for agent in range(number_of_agents)]
 
 
 def generate_accessible_worlds(possible_worlds, hand_cards):
     """
-	Generates the worlds accessible given the current hand
-	"""
+    Generates the worlds accessible given the current hand
+    """
     accessible_worlds = []
     nr_of_agents = len(hand_cards)
     nr_of_cards_in_hand = len(hand_cards[0])
@@ -53,15 +53,15 @@ def same_elements(list1, list2):
 
 def generate_worlds(accessible_worlds, deck):
     """
-	For each permutation we create a world.
-	We get the name by joining the values of the cards into a single string.
-	We then get the truth values of the world by going over the cards in the world and marking:
-	- The first third of the cards as belonging to agent a
-	- The second third of the cards as belonging to agent b
-	- The final third of the cards as belonging to agent c
-	After that we check the world truth values against those of the other worlds.
-	If the world does not exist yet we add it to the worlds list
-	"""
+    For each permutation we create a world.
+    We get the name by joining the values of the cards into a single string.
+    We then get the truth values of the world by going over the cards in the world and marking:
+    - The first third of the cards as belonging to agent a
+    - The second third of the cards as belonging to agent b
+    - The final third of the cards as belonging to agent c
+    After that we check the world truth values against those of the other worlds.
+    If the world does not exist yet we add it to the worlds list
+    """
     worlds = []
 
     for world in accessible_worlds:
@@ -89,11 +89,11 @@ def generate_worlds(accessible_worlds, deck):
 
 def initialise_worlds(agents, deck, hand_cards):
     """
-	Generates the starting worlds of the Kripke model based on the agents and deck
-	First we make a list of all possible permutations of the deck
-	From these permutations we then gather all of the ones that are accessible given the current hand cards.
-	Finally we generate the worlds in the way needed to use them later
-	"""
+    Generates the starting worlds of the Kripke model based on the agents and deck
+    First we make a list of all possible permutations of the deck
+    From these permutations we then gather all of the ones that are accessible given the current hand cards.
+    Finally we generate the worlds in the way needed to use them later
+    """
     possible_worlds = list(permutations(deck, len(deck)))
     accessible_worlds = generate_accessible_worlds(possible_worlds, hand_cards)
     worlds = generate_worlds(accessible_worlds, deck)
@@ -103,12 +103,12 @@ def initialise_worlds(agents, deck, hand_cards):
 
 def initialise_relations(agents, deck, worlds):
     """
-	Generates the starting relations of the Kripke model based on the starting worlds
-	We first declare three empty sets for the agents.
-	We then go over each world combination for each agent.
-	We then add a relation for the agent for each world combination where the agent has the same cards.
-	(which is the starting knowledge of each agent, as each agent knows their own hand)
-	"""
+    Generates the starting relations of the Kripke model based on the starting worlds
+    We first declare three empty sets for the agents.
+    We then go over each world combination for each agent.
+    We then add a relation for the agent for each world combination where the agent has the same cards.
+    (which is the starting knowledge of each agent, as each agent knows their own hand)
+    """
     relations = {
         "a": set(),
         "b": set(),
@@ -135,11 +135,11 @@ def initialise_relations(agents, deck, worlds):
 
 def initialise_kripke_model(agents, deck, hand_cards):
     """
-	Generates the starting kripke model based on the agents and deck used
-	We first generate the starting worlds.
-	We then generate the starting relations of those worlds.
-	We then combine these into a kripke structure
-	"""
+    Generates the starting kripke model based on the agents and deck used
+    We first generate the starting worlds.
+    We then generate the starting relations of those worlds.
+    We then combine these into a kripke structure
+    """
     worlds = initialise_worlds(agents, deck, hand_cards)
 
     relations = initialise_relations(agents, deck, worlds)
@@ -151,8 +151,8 @@ def initialise_kripke_model(agents, deck, hand_cards):
 
 def get_list_of_facts(ks):
     """
-	Creates a complete list of all facts present in the model currently
-	"""
+    Creates a complete list of all facts present in the model currently
+    """
     fact_list = list()
     # Go through all worlds and make a list of all existing facts
     for world in ks.worlds:
@@ -163,9 +163,9 @@ def get_list_of_facts(ks):
 
 def generate_mission(agents, deck):
     """
-	Randomly selects an agent and a card
-	The mission indicates which agent should end up with which card
-	"""
+    Randomly selects an agent and a card
+    The mission indicates which agent should end up with which card
+    """
     mission_agent = random.choice(agents)
     mission_card = random.choice(deck)
     while (mission_card / len(deck)) > 0.67:
@@ -175,8 +175,8 @@ def generate_mission(agents, deck):
 
 def print_rules():
     """
-	A function which prints the rules of the game and gives a short explanation of what this program does.
-	"""
+    A function which prints the rules of the game and gives a short explanation of what this program does.
+    """
     print("")
     print("Rules and Explanation:")
     print("In this version of The Crew, the players work together to make sure a specific player gets a specific card.")
@@ -210,8 +210,8 @@ def print_rules():
 
 def game_loop(game):
     """
-	This function simulates the turns of each agent
-	"""
+    This function simulates the turns of each agent
+    """
     mission_ongoing = True
 
     while mission_ongoing:
@@ -270,15 +270,15 @@ def game_loop(game):
 
 def The_Crew_game():
     """
-	We initialise the Kripke model based on the number of agents, "cards" in the deck and the cards in the hands of the agents
-	Cards can be defined as suit 1 (1,2), suit 2 (3,4), trump suit(5,6).
-	"""
+    We initialise the Kripke model based on the number of agents, "cards" in the deck and the cards in the hands of the agents
+    Cards can be defined as suit 1 (1,2), suit 2 (3,4), trump suit(5,6).
+    """
     print("")
     print("Initializing Kripke model, this may take a few seconds")
 
-	agents = ["a","b","c"]
-	deck = [1,2,3,4,5,6]
-	communications_per_agent = 1
+    agents = ["a","b","c"]
+    deck = [1,2,3,4,5,6]
+    communications_per_agent = 1
 
     hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
     hand_cards = [hand_a, hand_b, hand_c]
