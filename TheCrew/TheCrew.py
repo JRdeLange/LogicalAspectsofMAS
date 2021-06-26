@@ -257,7 +257,7 @@ def The_Crew_game():
 
 	agents = ["a","b","c"]
 	deck = [1,2,3,4,5,6]
-	communications_per_agent = 2
+	communications_per_agent = 1
 
 	hand_a, hand_b, hand_c = deal_cards(deck, len(agents))
 	hand_cards = [hand_a, hand_b, hand_c]
